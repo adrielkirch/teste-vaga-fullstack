@@ -19,7 +19,7 @@ Você foi designado para desenvolver uma aplicação que deve lidar com grandes 
 ## Validação de CPF ou CNPJ
 
 - Implementaremos uma função para validar o campo nrCpfCnpj e verificar se ele é um CPF ou CNPJ válido, seguindo as regras de validação apropriadas para cada formato.
-- Parte de todos os CPF e CNPJ sao invalidos, usamos um script para gerar dados fictícios. 
+- Parte de todos os CPF e CNPJ sao invalidos, usamos um script para gerar dados fictícios.
 
 ## Validação de Valor Total e Prestações
 
