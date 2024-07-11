@@ -13,7 +13,7 @@ class WebSocketServer {
     });
   }
 
-  async readFileAsync(clientId, folder, filename) {
+  async processFileAsync(clientId, folder, filename) {
     const filePath = `${__dirname}/../files/${folder}/${filename}`;
     const startTimestamp = Date.now();
     let rowCount = 0;
@@ -74,7 +74,7 @@ class WebSocketServer {
       let [folder, filename] = command.split("/");
 
       try {
-        const { rowCount, processingTime } = await this.readFileAsync(
+        const { rowCount, processingTime } = await this.processFileAsync(
           clientId,
           folder,
           filename
