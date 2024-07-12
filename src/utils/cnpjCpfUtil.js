@@ -28,7 +28,7 @@ function processCpfOrCnpj(data) {
   value = data["nrCpfCnpj"];
   const isSupposedToBeCnpj = supposedToBeCnpj(value);
   let result = "0"
-
+  
   if (isSupposedToBeCnpj) {
     result = isValidCNPJ(value) ? "1" : "0";
     return result;

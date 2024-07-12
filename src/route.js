@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const dataController = require("./controller");
-
-router.get("/", dataController.getData);
+const dataController = require("./controllers/controller");
 
 router.post("/", dataController.processData);
 
