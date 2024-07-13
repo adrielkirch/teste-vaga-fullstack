@@ -21,6 +21,8 @@ function processFormatValueToBRL(data) {
     "vlMulta",
     "vlMora",
     "vlPresta",
+    "vlAtual",
+    "vlMov",
   ];
   fieldsToFormatToBRL.forEach((field) => {
     if (data[field]) {
@@ -43,8 +45,20 @@ function validateProvision(data) {
   return "1";
 }
 
+function calcVlMov(data) {
+  const pendingProvisions = data.qtPrestacoes - data.nrPresta;
+  const vlMov = (data.vlPresta * pendingProvisions) + data.vlAtual;
+  return vlMov;
+}
+
+function validateMovValue(vlMov, vlTotal) {
+  return Math.round(vlTotal) !== Math.round(vlMov) ? "0" : "1";
+}
+
 module.exports = {
   formatToBRL,
   processFormatValueToBRL,
   validateProvision,
+  calcVlMov,
+  validateMovValue,
 };

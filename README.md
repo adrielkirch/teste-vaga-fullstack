@@ -33,3 +33,27 @@ Você foi designado para desenvolver uma aplicação que deve lidar com grandes 
 A conclusão bem-sucedida deste teste será avaliada com base na implementação eficiente de conceitos como tratamento de dados em larga escala, comunicação assíncrona, gerenciamento de estado, manipulação de CSV, escolha adequada de tecnologias e boas práticas de desenvolvimento.
 
 Boa sorte!
+
+## Process csv with HTTP
+
+Method: POST
+
+
+```http://localhost:3000/data```
+
+Body:
+
+```
+{
+    "folder":"unprocessed",
+    "filename":"data.csv"
+}
+```
+
+## Process csv with WebSockets
+
+```sudo npm i -g wscat```
+
+```wscat -c "ws://localhost:3000```
+
+```PROCESS unprocessed/data.csv```

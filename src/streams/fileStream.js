@@ -2,9 +2,13 @@ const fs = require("fs");
 const csv = require("csv-parser");
 const { Transform } = require("stream");
 const { processCpfOrCnpj } = require("../utils/cnpjCpfUtil");
-const { processFormatValueToBRL, validateProvision } = require("../utils/financialUtil");
-
-let totalValid = 0
+const {
+  processFormatValueToBRL,
+  formatToBRL,
+  validateProvision,
+  calcVlMov,
+  validateMovValue,
+} = require("../utils/financialUtil");
 
 function createWriteStream(outputPath) {
   return fs.createWriteStream(outputPath, { encoding: "utf8" });
@@ -21,29 +25,32 @@ function createTransformStream(
   sendToClientCallBack = null
 ) {
   let headersWritten = false;
-  
 
   return new Transform({
     objectMode: true,
     transform(chunk, encoding, callback) {
       try {
         if (!headersWritten) {
-          const headers = `${Object.keys(chunk).join(",")},nrCpfCnpjValid,vlPrestaValid\n`;
+          const headers = `${Object.keys(chunk).join(
+            ","
+          )},nrCpfCnpjValid,vlPrestaValid,vlMov,vlMovValid\n`;
           writableStream.write(headers);
           headersWritten = true;
         }
+        //processFormatValueToBRL(chunk);
         const isValidCpfOrCnpj = processCpfOrCnpj(chunk);
-        const isValidVlPrest = validateProvision(chunk)
+        const isValidVlPrest = validateProvision(chunk);
+        const vlMov = calcVlMov(chunk) + "";
+        const isValidValMov = validateMovValue(chunk);
 
         const csvLine = `${Object.values(chunk).join(
           ","
-        )},${isValidCpfOrCnpj},${isValidVlPrest}\n`;
-
-        processFormatValueToBRL(chunk);
+        )},${isValidCpfOrCnpj},${isValidVlPrest},${vlMov},${isValidValMov}\n`;
 
         if (clients && clientId && sendToClientCallBack) {
           sendToClientCallBack(clients, clientId, csvLine);
         }
+
         writableStream.write(csvLine);
         callback();
       } catch (err) {
