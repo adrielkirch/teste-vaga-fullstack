@@ -2,7 +2,9 @@ const fs = require("fs");
 const csv = require("csv-parser");
 const { Transform } = require("stream");
 const { processCpfOrCnpj } = require("../utils/cnpjCpfUtil");
-const { processFormatValueToBRL } = require("../utils/financialUtil");
+const { processFormatValueToBRL, validateProvision } = require("../utils/financialUtil");
+
+let totalValid = 0
 
 function createWriteStream(outputPath) {
   return fs.createWriteStream(outputPath, { encoding: "utf8" });
@@ -19,28 +21,29 @@ function createTransformStream(
   sendToClientCallBack = null
 ) {
   let headersWritten = false;
+  
 
   return new Transform({
     objectMode: true,
     transform(chunk, encoding, callback) {
       try {
         if (!headersWritten) {
-          const headers = `${Object.keys(chunk).join(",")},nrCpfCnpjValid\n`;
+          const headers = `${Object.keys(chunk).join(",")},nrCpfCnpjValid,vlPrestaValid\n`;
           writableStream.write(headers);
           headersWritten = true;
         }
         const isValidCpfOrCnpj = processCpfOrCnpj(chunk);
+        const isValidVlPrest = validateProvision(chunk)
 
         const csvLine = `${Object.values(chunk).join(
           ","
-        )},${isValidCpfOrCnpj}\n`;
+        )},${isValidCpfOrCnpj},${isValidVlPrest}\n`;
 
         processFormatValueToBRL(chunk);
 
         if (clients && clientId && sendToClientCallBack) {
           sendToClientCallBack(clients, clientId, csvLine);
         }
-
         writableStream.write(csvLine);
         callback();
       } catch (err) {
