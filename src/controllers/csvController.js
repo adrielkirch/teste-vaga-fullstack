@@ -1,10 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
-const dataService = require("../services/service");
+const csvService = require("../services/csvService");
 
 async function processData(req, res) {
   try {
     const { folder, filename } = req.body;
-    const data = await dataService.processData(
+    const data = await csvService.processData(
       folder,
       filename,
       null,

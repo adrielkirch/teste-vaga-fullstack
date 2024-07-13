@@ -58,40 +58,46 @@ async function processFileAsync(
   clientId = null,
   sendToClientCallBack = null
 ) {
+  if (!filename) {
+    return Promise.reject(new Error("Filename is not defined"));
+  }
+
   const filePath = `${__dirname}/../../files/${folder}/${filename}`;
   const outputPath = `${__dirname}/../../files/processed/${filename}_processed.csv`;
+
   return new Promise((resolve, reject) => {
-    try {
-      const startDateTime = new Date();
-      const writableStream = createWriteStream(outputPath);
-      const readStream = createReadStream(filePath);
+    const startDateTime = new Date();
+    const writableStream = createWriteStream(outputPath);
 
-      const transformStream = createTransformStream(
-        writableStream,
-        clients,
-        clientId,
-        sendToClientCallBack
-      );
+    const readStream = createReadStream(filePath);
+    readStream.on("error", (err) => {
+      console.error("Error reading file:", err);
+      writableStream.end();
+      reject(new Error(`Error reading file: ${err.message}`));
+    });
 
-      readStream
-        .pipe(csv())
-        .pipe(transformStream)
-        .on("finish", () => {
-          const endDateTime = new Date();
-          const secondsProcessing = (endDateTime - startDateTime) / 1e3;
-          writableStream.end();
-          resolve(
-            `Processed ${filename} in ${secondsProcessing.toFixed(1)} seconds`
-          );
-        })
-        .on("error", (err) => {
-          writableStream.end();
-          reject(new Error(`Error processing file: ${err.message}`));
-        });
-    } catch (err) {
-      console.error("Error setting up streams:", err);
-      reject(err);
-    }
+    const transformStream = createTransformStream(
+      writableStream,
+      clients,
+      clientId,
+      sendToClientCallBack
+    );
+
+    readStream
+      .pipe(csv())
+      .pipe(transformStream)
+      .on("finish", () => {
+        const endDateTime = new Date();
+        const secondsProcessing = (endDateTime - startDateTime) / 1e3;
+        writableStream.end();
+        resolve(
+          `Processed ${filename} in ${secondsProcessing.toFixed(1)} seconds`
+        );
+      })
+      .on("error", (err) => {
+        writableStream.end();
+        reject(new Error(`Error processing file: ${err.message}`));
+      });
   });
 }
 

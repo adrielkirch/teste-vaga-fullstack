@@ -1,15 +1,5 @@
 const fileStream = require("../streams/fileStream");
 
-async function getData(folder, filename) {
-  try {
-    const data = await fileStream.processFileAsync(folder, filename);
-    return data;
-  } catch (err) {
-    console.error("Error getting data:", err);
-    return null;
-  }
-}
-
 async function processData(
   folder,
   filename,
@@ -27,12 +17,10 @@ async function processData(
     );
     return result;
   } catch (err) {
-    console.error("Error getting data:", err);
-    return null;
+    throw err; 
   }
 }
 
 module.exports = {
-  getData,
   processData,
 };

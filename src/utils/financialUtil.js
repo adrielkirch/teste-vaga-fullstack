@@ -13,11 +13,9 @@ function formatToBRL(value) {
 }
 
 function processFormatValueToBRL(data) {
-    console.log(data)
     const fieldsToFormatToBRL = ['vlTotal', 'vlDescon', 'vlIof', 'vlOutAcr', 'vlMulta', 'vlMora', 'vlPresta'];
     fieldsToFormatToBRL.forEach(field => {
       if (data[field]) {
-        console.log(`Formatting field ${field}: ${data[field]}`);
         data[field] = formatToBRL(data[field]);
       }
     });

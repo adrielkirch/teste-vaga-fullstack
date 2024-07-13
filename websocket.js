@@ -1,5 +1,5 @@
 const { Server } = require("ws");
-const { onConnection } = require("./services/wsService");
+const { onConnection } = require("./src/services/websocketService");
 
 class WebSocketServer {
   constructor(server) {

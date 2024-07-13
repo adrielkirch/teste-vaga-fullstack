@@ -1,10 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
-const fs = require("fs");
-const csv = require("csv-parser");
-const { Transform } = require("stream");
-const { processData } = require("./service");
-
-
+const csvService= require("./csvService");
 
 async function onConnection(ws, clients) {
   const clientId = uuidv4();
@@ -33,7 +28,7 @@ async function onMessage(clients, message, clientId) {
     let [folder, filename] = command.split("/");
 
     try {
-      const processedMessage  = await processData(
+      const processedMessage  = await csvService.processData(
         folder,
         filename,
         clients,
