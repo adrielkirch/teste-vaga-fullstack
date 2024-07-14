@@ -9,6 +9,7 @@ const {
   calcVlMov,
   validateMovValue,
 } = require("../utils/financialUtil");
+const { processHeaders, countLineItems, formatLine } = require("../utils/csvUtil");
 
 function createWriteStream(outputPath) {
   return fs.createWriteStream(outputPath, { encoding: "utf8" });
@@ -25,33 +26,53 @@ function createTransformStream(
   sendToClientCallBack = null
 ) {
   let headersWritten = false;
-
+  let headersCount = 0;
+  let headersLine = null;
+  
   return new Transform({
     objectMode: true,
     transform(chunk, encoding, callback) {
       try {
         if (!headersWritten) {
-          const headers = `${Object.keys(chunk).join(
-            ","
-          )},nrCpfCnpjValid,vlPrestaValid,vlMov,vlMovValid\n`;
-          writableStream.write(headers);
+          headersLine = processHeaders(chunk, [
+            "nrCpfCnpjValid",
+            "vlPrestaValid",
+            "vlMov",
+            "vlMovValid",
+          ]);
+          console.log("headersLine -> " + headersLine);
+          headersCount = countLineItems(headersLine);
+          console.log("headersCount -> " + headersCount);
+          writableStream.write(headersLine);
           headersWritten = true;
         }
-        //processFormatValueToBRL(chunk);
+
         const isValidCpfOrCnpj = processCpfOrCnpj(chunk);
         const isValidVlPrest = validateProvision(chunk);
-        const vlMov = calcVlMov(chunk) + "";
+        const vlMov = calcVlMov(chunk);
         const isValidValMov = validateMovValue(chunk);
 
-        const csvLine = `${Object.values(chunk).join(
-          ","
-        )},${isValidCpfOrCnpj},${isValidVlPrest},${vlMov},${isValidValMov}\n`;
+        processFormatValueToBRL(chunk);
+
+        let csvLine = `${Object.values(chunk).join(
+          ";"
+        )};${isValidCpfOrCnpj};${isValidVlPrest};${formatToBRL(vlMov)};${isValidValMov}\n`;
+
+  
+        const lineItemCount = countLineItems(csvLine);
+
+        if (lineItemCount !== headersCount) {
+          throw new Error(
+            `Line item count (${lineItemCount}) is not equal to headers count (${headersCount})`
+          );
+        }
 
         if (clients && clientId && sendToClientCallBack) {
           sendToClientCallBack(clients, clientId, csvLine);
         }
 
         writableStream.write(csvLine);
+
         callback();
       } catch (err) {
         console.error("Error in transform stream:", err);
@@ -60,6 +81,7 @@ function createTransformStream(
     },
   });
 }
+
 
 async function processFileAsync(
   folder,

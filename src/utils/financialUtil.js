@@ -13,22 +13,17 @@ function formatToBRL(value) {
 }
 
 function processFormatValueToBRL(data) {
-  const fieldsToFormatToBRL = [
-    "vlTotal",
-    "vlDescon",
-    "vlIof",
-    "vlOutAcr",
-    "vlMulta",
-    "vlMora",
-    "vlPresta",
-    "vlAtual",
-    "vlMov",
-  ];
-  fieldsToFormatToBRL.forEach((field) => {
-    if (data[field]) {
-      data[field] = formatToBRL(data[field]);
+  const listVl = [];
+  Object.keys(data).forEach((key) => {
+    if (key.startsWith("vl")) {
+      listVl.push(key);
     }
   });
+  listVl.forEach((field) => {
+    data[field] = formatToBRL(data[field]);
+  });
+
+  console.log(data)
 }
 
 function validateProvision(data) {
@@ -47,7 +42,7 @@ function validateProvision(data) {
 
 function calcVlMov(data) {
   const pendingProvisions = data.qtPrestacoes - data.nrPresta;
-  const vlMov = (data.vlPresta * pendingProvisions) + data.vlAtual;
+  const vlMov = data.vlPresta * pendingProvisions + data.vlAtual;
   return vlMov;
 }
 
